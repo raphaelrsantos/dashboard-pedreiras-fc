@@ -113,8 +113,31 @@ if URL_GOOGLE_SHEETS:
         cor_saldo_periodo = "#00cc96" if saldo_periodo >= 0 else "#ff4b4b"
         cor_texto_saldo_periodo = "#111111" if saldo_periodo >= 0 else "#ffffff"
         
-        cor_saldo = "#00cc96" if saldo_atual >= 0 else "#ff4b4b"
-        cor_texto_saldo = "#111111" if saldo_atual >= 0 else "#ffffff"
+        cor_saldo = "#005A32" if saldo_atual >= 0 else "#ff4b4b"
+        cor_texto_saldo = "#ffffff"
+        
+        # Definir título do card de saldo conforme mês selecionado
+        hoje = pd.Timestamp.now().replace(day=1)
+        datas_meses = pd.to_datetime(df['Mes_Ano'], format='%m/%Y', errors='coerce')
+        mes_max = datas_meses.max()  # último mês registrado na planilha
+        
+        if mes_selecionado == "Todos":
+            if pd.notnull(mes_max) and mes_max > hoje:
+                data_proj_str = f"30/{mes_max.strftime('%m/%Y')}"
+                titulo_card_saldo = f"Saldo Acumulado (Projetado para {data_proj_str})"
+                titulo_card_saldo_periodo = f"Saldo do Período (Projetado para {data_proj_str})"
+            else:
+                titulo_card_saldo = "Saldo Acumulado (Em Caixa)"
+                titulo_card_saldo_periodo = "Saldo do Período"
+        else:
+            data_mes_sel = pd.to_datetime(mes_selecionado, format='%m/%Y', errors='coerce')
+            if pd.isnull(data_mes_sel) or data_mes_sel <= hoje:
+                titulo_card_saldo = "Saldo Acumulado (Em Caixa)"
+                titulo_card_saldo_periodo = "Saldo do Período"
+            else:
+                data_proj_str = f"30/{mes_selecionado}"
+                titulo_card_saldo = f"Saldo Acumulado (Projetado para {data_proj_str})"
+                titulo_card_saldo_periodo = f"Saldo do Período (Projetado para {data_proj_str})"
         
         with col1:
             st.markdown(f"""
@@ -133,14 +156,14 @@ if URL_GOOGLE_SHEETS:
         with col3:
             st.markdown(f"""
             <div style="background-color: {cor_saldo_periodo}; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <p style="margin: 0; font-size: 16px; color: {cor_texto_saldo_periodo}; font-weight: bold;">Saldo do Período</p>
+                <p style="margin: 0; font-size: 16px; color: {cor_texto_saldo_periodo}; font-weight: bold;">{titulo_card_saldo_periodo}</p>
                 <p style="margin: 0; font-size: 28px; color: {cor_texto_saldo_periodo}; font-weight: bold;">{saldo_periodo_str}</p>
             </div>
             """, unsafe_allow_html=True)
         with col4:
             st.markdown(f"""
             <div style="background-color: {cor_saldo}; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <p style="margin: 0; font-size: 16px; color: {cor_texto_saldo}; font-weight: bold;">Saldo Acumulado</p>
+                <p style="margin: 0; font-size: 16px; color: {cor_texto_saldo}; font-weight: bold;">{titulo_card_saldo}</p>
                 <p style="margin: 0; font-size: 28px; color: {cor_texto_saldo}; font-weight: bold;">{saldo_str}</p>
             </div>
             """, unsafe_allow_html=True)
@@ -239,29 +262,22 @@ if URL_GOOGLE_SHEETS:
                                            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11)))
                 st.plotly_chart(fig_evolucao, use_container_width=True, config={'staticPlot': True})
                 
-        with col_row2_2:
-            # Evolução do Saldo
-            titulo_saldo_web = "Saldo do Mês" if mes_selecionado != "Todos" else "Evolução do Saldo (Mês a Mês)"
-            st.subheader(titulo_saldo_web)
-            fluxo = df.groupby('Mes_Ano')['Valor'].sum().reset_index(name='Fluxo')
-            fluxo['Data_Ord'] = pd.to_datetime(fluxo['Mes_Ano'], format='%m/%Y', errors='coerce')
-            fluxo = fluxo.sort_values('Data_Ord')
-            fluxo['Saldo Acumulado'] = fluxo['Fluxo'].cumsum() + saldo_inicial
-            
-            if mes_selecionado != "Todos":
-                fluxo = fluxo[fluxo['Mes_Ano'] == mes_selecionado]
-            
-            if not fluxo.empty:
-                fluxo['Texto_Saldo'] = fluxo['Saldo Acumulado'].apply(lambda x: f"R$ {x:,.0f}".replace(',', '.'))
-                fig_saldo = px.bar(fluxo, x='Mes_Ano', y='Saldo Acumulado',
-                                    text='Texto_Saldo',
-                                    color_discrete_sequence=['#00CC96'])
-                fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0)
-                fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_saldo, use_container_width=True, config={'staticPlot': True})
-            else:
-                st.info("Nenhum dado registrado.")
-                
+        # Gráfico de Saldo Acumulado: apenas quando "Todos" os meses estão selecionados
+        if mes_selecionado == "Todos":
+            with col_row2_2:
+                st.subheader("Evolução do Saldo (Mês a Mês)")
+                fluxo = df.groupby('Mes_Ano')['Valor'].sum().reset_index(name='Fluxo')
+                fluxo['Data_Ord'] = pd.to_datetime(fluxo['Mes_Ano'], format='%m/%Y', errors='coerce')
+                fluxo = fluxo.sort_values('Data_Ord')
+                fluxo['Saldo Acumulado'] = fluxo['Fluxo'].cumsum() + saldo_inicial
+                if not fluxo.empty:
+                    fluxo['Texto_Saldo'] = fluxo['Saldo Acumulado'].apply(lambda x: f"R$ {x:,.0f}".replace(',', '.'))
+                    fig_saldo = px.bar(fluxo, x='Mes_Ano', y='Saldo Acumulado', text='Texto_Saldo',
+                                       color_discrete_sequence=['#005A32'])
+                    fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0)
+                    fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
+                    st.plotly_chart(fig_saldo, use_container_width=True, config={'staticPlot': True})
+
         st.markdown("---")
         st.subheader("Acompanhamento de Parcelamentos")
         

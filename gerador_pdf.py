@@ -67,7 +67,7 @@ def criar_pdf_relatorio(df_periodo, mes, entradas, saidas, saldo_periodo, saldo_
     pdf.ln(10)
     
     # Gráficos
-    if any([fig_receitas, fig_despesas, fig_evolucao, fig_saldo]):
+    if any([fig_receitas, fig_despesas, fig_evolucao]):
         pdf.set_font("helvetica", "B", 12)
         pdf.cell(0, 10, "Analises Detalhadas", new_x="LMARGIN", new_y="NEXT")
         pdf.ln(5)
@@ -127,22 +127,7 @@ def criar_pdf_relatorio(df_periodo, mes, entradas, saidas, saldo_periodo, saldo_
             pdf.image("temp_evo.png", x=10, y=y_bottom + 10, w=130)
             img_paths.append("temp_evo.png")
             
-        if fig_saldo:
-            pdf.set_xy(150, y_bottom)
-            titulo_saldo = "Saldo do Mes" if mes != "Todos" else "Evolucao do Saldo (Mes a Mes)"
-            pdf.cell(130, 8, titulo_saldo, align="C")
-            
-            fig_saldo.update_layout(
-                paper_bgcolor='white', plot_bgcolor='white', font=dict(color='black', size=36),
-                margin=dict(t=20, b=50, l=100, r=20),
-                yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False)
-            )
-            fig_saldo.update_traces(textfont_size=36)
-            fig_saldo.write_image("temp_sal.png", width=1200, height=800, scale=2)
-            pdf.image("temp_sal.png", x=150, y=y_bottom + 10, w=130)
-            img_paths.append("temp_sal.png")
-            
-        if fig_evolucao or fig_saldo:
+        if fig_evolucao:
             pdf.set_y(y_bottom + 95)
             
         if fig_parcelas:
