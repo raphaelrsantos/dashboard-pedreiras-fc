@@ -83,18 +83,19 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .card.finalizado {
-    border-color: rgba(128, 128, 128, 0.4);
-    opacity: 0.55;
+    border-color: rgba(128, 128, 128, 0.25);
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .card.finalizado:hover {
-    border-color: rgba(128, 128, 128, 0.8);
-    opacity: 0.9;
-    box-shadow: 0 10px 25px rgba(128, 128, 128, 0.2);
+    transform: none;
+    border-color: rgba(128, 128, 128, 0.25);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .card.finalizado h3 {
-    color: #a0aec0;
+    color: #888888;
 }
 
 /* Responsividade Mobile First */
@@ -123,7 +124,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Grid de Cards Clicáveis
-st.markdown("""<div class="card-container"><a href="https://pedreiras-financeiro.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">💰</div><h3>Painel Financeiro</h3><p>Acompanhe receitas, despesas, saldo e parcelamentos ativos do time.</p></div></a><a href="https://pedreiras-torneio-202602.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">🏆</div><h3>Torneio 2026/2 (Vigente)</h3><p>Tabela de jogos, classificação geral, artilharia e estatísticas do campeonato vigente.</p></div></a><a href="https://pedreiras-torneio-historico.streamlit.app/" target="_blank" class="card finalizado"><div><div class="card-icon">📜</div><h3>Torneio 2026/1 (Finalizado)</h3><p>Histórico completo, resultados e classificação do torneio anterior finalizado.</p></div></a></div>""", unsafe_allow_html=True)
+st.markdown("""<div class="card-container"><a href="https://pedreiras-financeiro.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">💰</div><h3>Painel Financeiro</h3><p>Acompanhe receitas, despesas, saldo e parcelamentos ativos do time.</p></div></a><a href="https://pedreiras-torneio-202602.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">🏆</div><h3>Torneio 2026/2 (Vigente)</h3><p>Tabela de jogos, classificação geral, artilharia e estatísticas do campeonato vigente.</p></div></a><div class="card finalizado"><div><div class="card-icon">📜</div><h3>Torneio 2026/1 (Finalizado)</h3><p>Histórico completo, resultados e classificação do torneio anterior finalizado.</p></div></div></div>""", unsafe_allow_html=True)
 
 # Rodapé simples
 st.markdown("""
