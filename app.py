@@ -22,6 +22,18 @@ URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc7AsbQs9d
 
 st.title("⚽ Dashboard Financeiro - Futebol das Pedreiras")
 
+# Bloqueia zoom por toque (pinch) nos gráficos no mobile
+st.markdown("""
+<style>
+    .js-plotly-plot .plotly, .js-plotly-plot .plotly div {
+        touch-action: none !important;
+    }
+    .stPlotlyChart {
+        touch-action: none !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 if URL_GOOGLE_SHEETS:
     try:
         # Lê diretamente do link do Google Sheets
@@ -166,7 +178,7 @@ if URL_GOOGLE_SHEETS:
                                       text='Texto_Valor',
                                       color_discrete_sequence=['#005A32'])
                 fig_receitas.update_traces(textposition='auto', textfont_size=20)
-                fig_receitas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False))
+                fig_receitas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
                 st.plotly_chart(fig_receitas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhuma entrada registrada.")
@@ -185,7 +197,7 @@ if URL_GOOGLE_SHEETS:
                                       text='Texto_Valor',
                                       color_discrete_sequence=['#8B0000'])
                 fig_despesas.update_traces(textposition='auto', textfont_size=20)
-                fig_despesas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False))
+                fig_despesas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
                 st.plotly_chart(fig_despesas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhuma saída registrada.")
@@ -204,7 +216,7 @@ if URL_GOOGLE_SHEETS:
                                       text='Texto_Valor',
                                       color_discrete_map={'Entrada': 'green', 'Saída': 'red'})
                 fig_evolucao.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=28)
-                fig_evolucao.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False))
+                fig_evolucao.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
                 st.plotly_chart(fig_evolucao, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
                 
         with col_row2_2:
@@ -225,7 +237,7 @@ if URL_GOOGLE_SHEETS:
                                     text='Texto_Saldo',
                                     color_discrete_sequence=['#00CC96'])
                 fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=28)
-                fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False))
+                fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
                 st.plotly_chart(fig_saldo, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhum dado registrado.")
@@ -339,7 +351,7 @@ if URL_GOOGLE_SHEETS:
                                       color_discrete_map={'Pago': '#005A32', 'Falta Pagar': '#8B0000'},
                                       text='Texto', height=600)
                 fig_parcelas.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=18, textangle=0, constraintext='none', hovertemplate='%{y}<br><b>%{text}</b>')
-                fig_parcelas.update_layout(barmode='stack', yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False))
+                fig_parcelas.update_layout(barmode='stack', yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
                 st.plotly_chart(fig_parcelas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhuma parcela ativa neste período.")
