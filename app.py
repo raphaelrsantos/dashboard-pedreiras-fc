@@ -179,7 +179,7 @@ if URL_GOOGLE_SHEETS:
                 fig_receitas.update_traces(textposition='outside', textfont_size=13, textangle=0)
                 fig_receitas.update_layout(
                     yaxis_title=None, xaxis_title=None, dragmode=False,
-                    xaxis=dict(showticklabels=False, range=[0, max_rec / 0.45]),
+                    xaxis=dict(showticklabels=False, range=[0, max_rec / 0.70]),
                     margin=dict(l=5, r=5, t=5, b=5)
                 )
                 st.plotly_chart(fig_receitas, use_container_width=True, config={'staticPlot': True})
