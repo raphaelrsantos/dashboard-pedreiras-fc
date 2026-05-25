@@ -22,13 +22,10 @@ URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc7AsbQs9d
 
 st.title("⚽ Dashboard Financeiro - Futebol das Pedreiras")
 
-st.markdown("### 📥 Fonte de Dados")
-link_input = st.text_input("Cole o link do Google Sheets (formato CSV) ou deixe em branco se já configurou no código:", value=URL_GOOGLE_SHEETS)
-
-if link_input:
+if URL_GOOGLE_SHEETS:
     try:
         # Lê diretamente do link do Google Sheets
-        df = pd.read_csv(link_input)
+        df = pd.read_csv(URL_GOOGLE_SHEETS)
         
         # O Google Sheets pode exportar colunas vazias extras se houver formatação.
         # Limitamos até a coluna J (as 10 primeiras colunas).
