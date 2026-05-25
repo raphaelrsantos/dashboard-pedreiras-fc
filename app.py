@@ -171,11 +171,17 @@ if URL_GOOGLE_SHEETS:
                 receitas_por_categoria = df_entradas.groupby('Categoria')['Valor'].sum().reset_index()
                 receitas_por_categoria['Texto_Valor'] = receitas_por_categoria['Valor'].apply(lambda x: f"R$ {x:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
                 receitas_por_categoria = receitas_por_categoria.sort_values(by='Valor', ascending=True)
+                # Limitar barras a 30% da largura visual
+                max_rec = receitas_por_categoria['Valor'].max()
                 fig_receitas = px.bar(receitas_por_categoria, x='Valor', y='Categoria', orientation='h',
                                       text='Texto_Valor',
                                       color_discrete_sequence=['#005A32'])
                 fig_receitas.update_traces(textposition='outside', textfont_size=13, textangle=0)
-                fig_receitas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False, margin=dict(r=10))
+                fig_receitas.update_layout(
+                    yaxis_title=None, xaxis_title=None, dragmode=False,
+                    xaxis=dict(showticklabels=False, range=[0, max_rec / 0.30]),
+                    margin=dict(l=5, r=5, t=5, b=5)
+                )
                 st.plotly_chart(fig_receitas, use_container_width=True, config={'staticPlot': True})
             else:
                 st.info("Nenhuma entrada registrada.")
@@ -190,11 +196,27 @@ if URL_GOOGLE_SHEETS:
                 despesas_por_categoria = df_saidas.groupby('Categoria')['Valor'].sum().reset_index()
                 despesas_por_categoria['Texto_Valor'] = despesas_por_categoria['Valor'].apply(lambda x: f"R$ {x:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
                 despesas_por_categoria = despesas_por_categoria.sort_values(by='Valor', ascending=True)
-                fig_despesas = px.bar(despesas_por_categoria, x='Valor', y='Categoria', orientation='h',
+                
+                # Limitar a maior barra a no máximo 3x a segunda maior
+                despesas_por_categoria['Valor_Visual'] = despesas_por_categoria['Valor']
+                vals_unicos = sorted(despesas_por_categoria['Valor'].unique())
+                if len(vals_unicos) >= 2:
+                    maior_d = vals_unicos[-1]
+                    segundo_d = vals_unicos[-2]
+                    limite_d = 3.0 * segundo_d
+                    if maior_d > limite_d and limite_d > 0:
+                        despesas_por_categoria.loc[despesas_por_categoria['Valor'] == maior_d, 'Valor_Visual'] = limite_d
+                
+                max_des = despesas_por_categoria['Valor_Visual'].max()
+                fig_despesas = px.bar(despesas_por_categoria, x='Valor_Visual', y='Categoria', orientation='h',
                                       text='Texto_Valor',
                                       color_discrete_sequence=['#8B0000'])
                 fig_despesas.update_traces(textposition='outside', textfont_size=13, textangle=0)
-                fig_despesas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False, margin=dict(r=10))
+                fig_despesas.update_layout(
+                    yaxis_title=None, xaxis_title=None, dragmode=False,
+                    xaxis=dict(showticklabels=False, range=[0, max_des / 0.30]),
+                    margin=dict(l=5, r=5, t=5, b=5)
+                )
                 st.plotly_chart(fig_despesas, use_container_width=True, config={'staticPlot': True})
             else:
                 st.info("Nenhuma saída registrada.")
