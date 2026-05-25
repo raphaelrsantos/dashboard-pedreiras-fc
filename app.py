@@ -363,7 +363,7 @@ if URL_GOOGLE_SHEETS:
                     yaxis=dict(tickfont=dict(size=11)),
                     legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11))
                 )
-                st.plotly_chart(fig_parcelas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
+                st.plotly_chart(fig_parcelas, use_container_width=True, config={'staticPlot': True})
             else:
                 st.info("Nenhuma parcela ativa neste período.")
         else:
