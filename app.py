@@ -23,7 +23,7 @@ URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc7AsbQs9d
 st.markdown("""
 <style>
     .titulo-dashboard {
-        font-size: clamp(1.1rem, 4vw, 1.8rem);
+        font-size: clamp(1.5rem, 5vw, 2.2rem);
         font-weight: 700;
         margin-bottom: 0.3rem;
         line-height: 1.2;
