@@ -174,8 +174,8 @@ if URL_GOOGLE_SHEETS:
                 fig_receitas = px.bar(receitas_por_categoria, x='Valor', y='Categoria', orientation='h',
                                       text='Texto_Valor',
                                       color_discrete_sequence=['#005A32'])
-                fig_receitas.update_traces(textposition='auto', textfont_size=20)
-                fig_receitas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
+                fig_receitas.update_traces(textposition='outside', textfont_size=13, textangle=0)
+                fig_receitas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False, margin=dict(r=10))
                 st.plotly_chart(fig_receitas, use_container_width=True, config={'staticPlot': True})
             else:
                 st.info("Nenhuma entrada registrada.")
@@ -193,9 +193,9 @@ if URL_GOOGLE_SHEETS:
                 fig_despesas = px.bar(despesas_por_categoria, x='Valor', y='Categoria', orientation='h',
                                       text='Texto_Valor',
                                       color_discrete_sequence=['#8B0000'])
-                fig_despesas.update_traces(textposition='auto', textfont_size=20)
-                fig_despesas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_despesas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
+                fig_despesas.update_traces(textposition='outside', textfont_size=13, textangle=0)
+                fig_despesas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False, margin=dict(r=10))
+                st.plotly_chart(fig_despesas, use_container_width=True, config={'staticPlot': True})
             else:
                 st.info("Nenhuma saída registrada.")
 
@@ -208,13 +208,14 @@ if URL_GOOGLE_SHEETS:
             df_abs['Valor'] = df_abs['Valor'].abs()
             evolucao = df_abs.groupby(['Mes_Ano', 'Tipo'])['Valor'].sum().reset_index()
             if not evolucao.empty:
-                evolucao['Texto_Valor'] = evolucao['Valor'].apply(lambda x: f"R$ {x:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
+                evolucao['Texto_Valor'] = evolucao['Valor'].apply(lambda x: f"R$ {x:,.0f}".replace(',', '.'))
                 fig_evolucao = px.bar(evolucao, x='Mes_Ano', y='Valor', color='Tipo', barmode='group',
                                       text='Texto_Valor',
                                       color_discrete_map={'Entrada': 'green', 'Saída': 'red'})
-                fig_evolucao.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=28)
-                fig_evolucao.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_evolucao, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
+                fig_evolucao.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0)
+                fig_evolucao.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False,
+                                           legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11)))
+                st.plotly_chart(fig_evolucao, use_container_width=True, config={'staticPlot': True})
                 
         with col_row2_2:
             # Evolução do Saldo
@@ -229,13 +230,13 @@ if URL_GOOGLE_SHEETS:
                 fluxo = fluxo[fluxo['Mes_Ano'] == mes_selecionado]
             
             if not fluxo.empty:
-                fluxo['Texto_Saldo'] = fluxo['Saldo Acumulado'].apply(lambda x: f"R$ {x:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.'))
+                fluxo['Texto_Saldo'] = fluxo['Saldo Acumulado'].apply(lambda x: f"R$ {x:,.0f}".replace(',', '.'))
                 fig_saldo = px.bar(fluxo, x='Mes_Ano', y='Saldo Acumulado',
                                     text='Texto_Saldo',
                                     color_discrete_sequence=['#00CC96'])
-                fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=28)
+                fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0)
                 fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_saldo, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
+                st.plotly_chart(fig_saldo, use_container_width=True, config={'staticPlot': True})
             else:
                 st.info("Nenhum dado registrado.")
                 
