@@ -123,7 +123,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Grid de Cards Clicáveis
-st.markdown("""<div class="card-container"><a href="https://pedreiras-financeiro.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">💰</div><h3>Painel Financeiro</h3><p>Acompanhe receitas, despesas, saldo e parcelamentos ativos do time.</p></div></a><a href="https://pedreiras-torneio.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">🏆</div><h3>Torneio 2026/2 (Vigente)</h3><p>Tabela de jogos, classificação geral, artilharia e estatísticas do campeonato vigente.</p></div></a><a href="https://pedreiras-torneio-historico.streamlit.app/" target="_blank" class="card finalizado"><div><div class="card-icon">📜</div><h3>Torneio 2026/1 (Finalizado)</h3><p>Histórico completo, resultados e classificação do torneio anterior finalizado.</p></div></a></div>""", unsafe_allow_html=True)
+st.markdown("""<div class="card-container"><a href="https://pedreiras-financeiro.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">💰</div><h3>Painel Financeiro</h3><p>Acompanhe receitas, despesas, saldo e parcelamentos ativos do time.</p></div></a><a href="https://pedreiras-torneio-202602.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">🏆</div><h3>Torneio 2026/2 (Vigente)</h3><p>Tabela de jogos, classificação geral, artilharia e estatísticas do campeonato vigente.</p></div></a><a href="https://pedreiras-torneio-historico.streamlit.app/" target="_blank" class="card finalizado"><div><div class="card-icon">📜</div><h3>Torneio 2026/1 (Finalizado)</h3><p>Histórico completo, resultados e classificação do torneio anterior finalizado.</p></div></a></div>""", unsafe_allow_html=True)
 
 # Rodapé simples
 st.markdown("""
