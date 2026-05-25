@@ -188,7 +188,7 @@ if URL_GOOGLE_SHEETS:
                                       color_discrete_sequence=['#8B0000'])
                 fig_despesas.update_traces(textposition='auto', textfont_size=20)
                 fig_despesas.update_layout(yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_despesas, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_despesas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhuma saída registrada.")
 
@@ -207,7 +207,7 @@ if URL_GOOGLE_SHEETS:
                                       color_discrete_map={'Entrada': 'green', 'Saída': 'red'})
                 fig_evolucao.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=28)
                 fig_evolucao.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_evolucao, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_evolucao, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
                 
         with col_row2_2:
             # Evolução do Saldo
@@ -228,7 +228,7 @@ if URL_GOOGLE_SHEETS:
                                     color_discrete_sequence=['#00CC96'])
                 fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=28)
                 fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_saldo, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_saldo, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhum dado registrado.")
                 
@@ -300,7 +300,10 @@ if URL_GOOGLE_SHEETS:
                 # (Isso garante a inclusão de parcelas pagas no ano passado que não estão no CSV atual)
                 pago = max(total_projetado - falta, pago_planilha)
                 
-                nome_com_emoji = add_emoji_to_name(base)
+                # Truncar nomes muito longos para caber no mobile
+                MAX_CHARS = 28
+                nome_curto = (base[:MAX_CHARS] + '…') if len(base) > MAX_CHARS else base
+                nome_com_emoji = add_emoji_to_name(nome_curto)
                 
                 if pago > 0:
                     resumo_parcelas.append({
@@ -337,12 +340,22 @@ if URL_GOOGLE_SHEETS:
                         fator = limite_visual / maior_valor
                         df_resumo_parc.loc[df_resumo_parc['Total_Item'] == maior_valor, 'Valor_Visual'] = df_resumo_parc['Valor'] * fator
                 
+                n_itens = df_resumo_parc['Item'].nunique()
+                altura_grafico = max(300, n_itens * 50)
+                
                 fig_parcelas = px.bar(df_resumo_parc, x='Valor_Visual', y='Item', color='Status', orientation='h',
                                       color_discrete_map={'Pago': '#005A32', 'Falta Pagar': '#8B0000'},
-                                      text='Texto', height=600)
-                fig_parcelas.update_traces(texttemplate='<b>%{text}</b>', textposition='auto', textfont_size=18, textangle=0, constraintext='none', hovertemplate='%{y}<br><b>%{text}</b>')
-                fig_parcelas.update_layout(barmode='stack', yaxis_title=None, xaxis_title=None, xaxis=dict(showticklabels=False), dragmode=False)
-                st.plotly_chart(fig_parcelas, use_container_width=True, config={'staticPlot': True})
+                                      text='Texto', height=altura_grafico)
+                fig_parcelas.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0, constraintext='none', hovertemplate='%{y}<br><b>%{text}</b>')
+                fig_parcelas.update_layout(
+                    barmode='stack', yaxis_title=None, xaxis_title=None,
+                    xaxis=dict(showticklabels=False),
+                    dragmode=False,
+                    margin=dict(l=10, r=80, t=10, b=10),
+                    yaxis=dict(tickfont=dict(size=11)),
+                    legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11))
+                )
+                st.plotly_chart(fig_parcelas, use_container_width=True, config={'scrollZoom': False, 'displayModeBar': False})
             else:
                 st.info("Nenhuma parcela ativa neste período.")
         else:
