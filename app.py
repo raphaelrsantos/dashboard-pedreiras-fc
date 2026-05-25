@@ -20,17 +20,11 @@ def clean_currency(x):
 # URL Pública do Google Sheets em formato CSV (Cole seu link aqui para não precisar digitar toda vez)
 URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc7AsbQs9d5DOGXGHE8_3o4AFnNjSwIycCLynZ204QG7eUKSDdoLBfnrRm-WHNMWgosvOxs8S7alW1/pub?gid=0&single=true&output=csv"
 
-st.markdown("""
-<style>
-    .titulo-dashboard {
-        font-size: clamp(1.8rem, 7vw, 2.5rem) !important;
-        font-weight: 700;
-        margin-bottom: 0.3rem;
-        line-height: 1.2;
-    }
-</style>
-<p class="titulo-dashboard">⚽ Dashboard Financeiro · Futebol das Pedreiras</p>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<h1 style="font-size:1.8rem;font-weight:800;line-height:1.3;margin:0 0 0.5rem 0;padding:0">'
+    '⚽ Dashboard Financeiro · Futebol das Pedreiras</h1>',
+    unsafe_allow_html=True
+)
 
 
 
