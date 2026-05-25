@@ -15,12 +15,12 @@ html, body, [data-testid="stAppViewContainer"] {
 
 .portal-header {
     text-align: center;
-    padding: 20px 0;
-    margin-bottom: 20px;
+    padding: 15px 0;
+    margin-bottom: 15px;
 }
 
 .portal-title {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 800;
     color: #FFD700;
     margin: 0;
@@ -28,27 +28,30 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .portal-subtitle {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #a0aec0;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .card-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
     margin-top: 10px;
 }
 
 .card {
     background: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
     border: 2px solid rgba(255, 215, 0, 0.4);
-    border-radius: 16px;
-    padding: 30px;
+    border-radius: 12px;
+    padding: 20px;
     text-align: center;
     text-decoration: none;
     color: white !important;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 220px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -56,41 +59,56 @@ html, body, [data-testid="stAppViewContainer"] {
 .card:hover {
     transform: translateY(-4px);
     border-color: #FFD700;
-    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.25);
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.25);
 }
 
 .card-icon {
-    font-size: 40px;
-    margin-bottom: 15px;
+    font-size: 30px;
+    margin-bottom: 10px;
 }
 
 .card h3 {
-    margin: 0 0 10px 0;
+    margin: 0 0 8px 0;
     color: #FFD700;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 600;
 }
 
 .card p {
     margin: 0;
     color: #a0aec0;
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.card.finalizado {
+    border-color: rgba(128, 128, 128, 0.4);
+    opacity: 0.55;
+}
+
+.card.finalizado:hover {
+    border-color: rgba(128, 128, 128, 0.8);
+    opacity: 0.9;
+    box-shadow: 0 10px 25px rgba(128, 128, 128, 0.2);
+}
+
+.card.finalizado h3 {
+    color: #a0aec0;
 }
 
 /* Responsividade Mobile First */
-@media (max-width: 600px) {
-    .portal-title {
-        font-size: 1.8rem;
+@media (max-width: 768px) {
+    .card-container {
+        grid-template-columns: 1fr;
     }
     .card {
-        padding: 20px;
+        height: auto;
+        min-height: 160px;
+        padding: 15px;
     }
-    .card h3 {
-        font-size: 20px;
-    }
-    .card p {
-        font-size: 13px;
+    .portal-title {
+        font-size: 1.8rem;
     }
 }
 </style>
@@ -105,25 +123,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Grid de Cards Clicáveis
-st.markdown("""
-<div class="card-container">
-    <a href="https://pedreiras-financeiro.streamlit.app/" target="_blank" class="card">
-        <div class="card-icon">💰</div>
-        <h3>Painel Financeiro</h3>
-        <p>Acompanhe fluxo de caixa, evolução de saldos, receitas, despesas e controle de parcelamentos ativos do time.</p>
-    </a>
-    
-    <a href="https://pedreiras-torneio.streamlit.app/" target="_blank" class="card">
-        <div class="card-icon">🏆</div>
-        <h3>Torneio 2026/2 (Vigente)</h3>
-        <p>Acompanhe tabela de jogos, classificação geral, artilharia, cartões e estatísticas das equipes participantes.</p>
-    </a>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("""<div class="card-container"><a href="https://pedreiras-financeiro.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">💰</div><h3>Painel Financeiro</h3><p>Acompanhe receitas, despesas, saldo e parcelamentos ativos do time.</p></div></a><a href="https://pedreiras-torneio.streamlit.app/" target="_blank" class="card"><div><div class="card-icon">🏆</div><h3>Torneio 2026/2 (Vigente)</h3><p>Tabela de jogos, classificação geral, artilharia e estatísticas do campeonato vigente.</p></div></a><a href="https://pedreiras-torneio-historico.streamlit.app/" target="_blank" class="card finalizado"><div><div class="card-icon">📜</div><h3>Torneio 2026/1 (Finalizado)</h3><p>Histórico completo, resultados e classificação do torneio anterior finalizado.</p></div></a></div>""", unsafe_allow_html=True)
 
 # Rodapé simples
 st.markdown("""
-<div style="text-align: center; margin-top: 60px; color: #4a5568; font-size: 13px;">
+<div style="text-align: center; margin-top: 50px; color: #4a5568; font-size: 13px;">
     Pedreiras FC &copy; 2026 • Todos os direitos reservados.
 </div>
 """, unsafe_allow_html=True)
