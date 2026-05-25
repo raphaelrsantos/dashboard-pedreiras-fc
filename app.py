@@ -67,6 +67,9 @@ if URL_GOOGLE_SHEETS:
         <style>
         .stSelectbox div[data-baseweb="select"] {
             font-size: 22px !important;
+            border: 2px solid #FFD700 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.5) !important;
         }
         </style>
         """, unsafe_allow_html=True)
