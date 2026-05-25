@@ -48,7 +48,7 @@ if URL_GOOGLE_SHEETS:
         df = df[df['Data'] >= pd.to_datetime('2026-01-01')].copy()
         df = df.sort_values('Data').reset_index(drop=True)
         
-        st.success("Arquivo carregado com sucesso!")
+
         
         # Filtro de Mês
         df['Mes_Ano'] = df['Ref']
