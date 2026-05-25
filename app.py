@@ -22,14 +22,14 @@ URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc7AsbQs9d
 
 st.title("⚽ Dashboard Financeiro - Futebol das Pedreiras")
 
-# Bloqueia zoom por toque (pinch) nos gráficos no mobile
+# Bloqueia zoom por toque (pinch) nos gráficos no mobile, mas permite rolar a página
 st.markdown("""
 <style>
     .js-plotly-plot .plotly, .js-plotly-plot .plotly div {
-        touch-action: none !important;
+        touch-action: pan-y !important;
     }
     .stPlotlyChart {
-        touch-action: none !important;
+        touch-action: pan-y !important;
     }
 </style>
 """, unsafe_allow_html=True)
