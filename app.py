@@ -5,6 +5,82 @@ from gerador_pdf import criar_pdf_relatorio
 
 st.set_page_config(page_title="Dashboard Financeiro - Pedreiras FC", page_icon="⚽", layout="wide")
 
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
+@st.cache_data(ttl=600)
+def obter_telefones_autorizados():
+    try:
+        url_auth = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSc7AsbQs9d5DOGXGHE8_3o4AFnNjSwIycCLynZ204QG7eUKSDdoLBfnrRm-WHNMWgosvOxs8S7alW1/pub?gid=145305578&single=true&output=csv"
+        df_auth = pd.read_csv(url_auth)
+        df_auth = df_auth.dropna(subset=['Telefone'])
+        df_auth['Telefone_Limpo'] = df_auth['Telefone'].astype(str).apply(lambda x: ''.join(c for c in x if c.isdigit()))
+        df_auth = df_auth[df_auth['Telefone_Limpo'].str.len() >= 8]
+        return df_auth[['Nomes', 'Apelido', 'Telefone_Limpo']].to_dict('records')
+    except Exception as e:
+        return []
+
+if not st.session_state['authenticated']:
+    st.markdown("""
+    <style>
+    .login-box {
+        max-width: 450px;
+        margin: 80px auto;
+        padding: 40px;
+        background-color: #0e1117;
+        border-radius: 15px;
+        border: 2px solid #FFD700;
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+        text-align: center;
+    }
+    .login-box h2 {
+        color: #FFD700;
+        margin-bottom: 10px;
+        font-family: 'Outfit', sans-serif;
+    }
+    .login-box p {
+        color: #a0aec0;
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="login-box">', unsafe_allow_html=True)
+    st.markdown('<h2>⚽ Pedreiras FC</h2>', unsafe_allow_html=True)
+    st.markdown('<p>Digite seu número de telefone cadastrado para liberar o acesso ao Painel Financeiro:</p>', unsafe_allow_html=True)
+    
+    tel_input = st.text_input("Telefone (com DDD):", placeholder="Ex: (62) 99999-9999", label_visibility="collapsed")
+    
+    if st.button("🔓 Acessar Dashboard", use_container_width=True):
+        if tel_input:
+            user_clean = ''.join(c for c in tel_input if c.isdigit())
+            if len(user_clean) < 8:
+                st.error("Por favor, insira um número válido (com DDD).")
+            else:
+                telefones = obter_telefones_autorizados()
+                user_last8 = user_clean[-8:]
+                authorized = False
+                nome_usuario = ""
+                for t in telefones:
+                    tel_limpo = t['Telefone_Limpo']
+                    if tel_limpo[-8:] == user_last8:
+                        authorized = True
+                        nome_usuario = t['Apelido'] if pd.notna(t['Apelido']) and str(t['Apelido']).strip() != "" else t['Nomes']
+                        break
+                
+                if authorized:
+                    st.session_state['authenticated'] = True
+                    st.session_state['usuario_nome'] = nome_usuario
+                    st.rerun()
+                else:
+                    st.error("❌ Telefone não cadastrado ou não autorizado!")
+        else:
+            st.warning("⚠️ Digite um número de telefone.")
+            
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.stop()
+
 def clean_currency(x):
     if pd.isna(x):
         return 0.0
@@ -25,6 +101,15 @@ st.markdown(
     '⚽ Dashboard Financeiro · Futebol das Pedreiras</h1>',
     unsafe_allow_html=True
 )
+
+col_welcome, col_logout = st.columns([4, 1.5])
+with col_welcome:
+    st.markdown(f"👋 Olá, **{st.session_state.get('usuario_nome', 'Jogador')}**! Bem-vindo(a) ao painel do time.")
+with col_logout:
+    if st.button("🚪 Sair", use_container_width=True):
+        st.session_state['authenticated'] = False
+        st.session_state['usuario_nome'] = None
+        st.rerun()
 
 
 
