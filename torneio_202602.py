@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import base64
+import os
 
 st.set_page_config(page_title="Torneio das Pedreiras - 2ª Temporada 2026", page_icon="🏆", layout="wide")
 
@@ -32,40 +34,33 @@ df_artilharia = carregar_dados(URL_ARTILHARIA)
 df_assistencias = carregar_dados(URL_ASSISTENCIAS)
 df_cartoes = carregar_dados(URL_CARTOES)
 
-# Dicionário de Escudos SVG dos Times
-ESCUDOS = {
-    "Napoli": """
-    <svg width="28" height="28" viewBox="0 0 100 100" style="vertical-align: middle; margin-right: 8px;">
-        <path d="M10 20 L50 5 L90 20 L90 60 C90 85 50 98 50 98 C50 98 10 85 10 60 Z" fill="#0c4b85" stroke="#fff" stroke-width="4"/>
-        <path d="M10 20 L50 5 L90 20 L90 35 L10 35 Z" fill="#082d52"/>
-        <text x="50" y="27" fill="#fff" font-size="13" font-weight="bold" font-family="'Outfit', sans-serif" text-anchor="middle">NAPOLI</text>
-        <text x="50" y="72" fill="#fff" font-size="38" font-weight="bold" font-family="'Outfit', sans-serif" text-anchor="middle">N</text>
-    </svg>
-    """,
-    "Sol Nascente": """
-    <svg width="28" height="28" viewBox="0 0 100 100" style="vertical-align: middle; margin-right: 8px;">
-        <path d="M10 20 L50 5 L90 20 L90 60 C90 85 50 98 50 98 C50 98 10 85 10 60 Z" fill="#d97706" stroke="#fbbf24" stroke-width="4"/>
-        <circle cx="50" cy="50" r="16" fill="#fbbf24" stroke="#b45309" stroke-width="2"/>
-        <path d="M50 20 L50 80 M20 50 L80 50 M29 29 L71 71 M29 71 L71 29" stroke="#fbbf24" stroke-width="2"/>
-        <text x="50" y="85" fill="#fff" font-size="9" font-weight="bold" font-family="'Outfit', sans-serif" text-anchor="middle">SOL NASCENTE</text>
-    </svg>
-    """,
-    "Falcões FC": """
-    <svg width="28" height="28" viewBox="0 0 100 100" style="vertical-align: middle; margin-right: 8px;">
-        <path d="M10 20 L50 5 L90 20 L90 60 C90 85 50 98 50 98 C50 98 10 85 10 60 Z" fill="#0f172a" stroke="#1d4ed8" stroke-width="4"/>
-        <path d="M30 42 L50 26 L70 42 L55 58 L50 50 L45 58 Z" fill="#1d4ed8"/>
-        <path d="M25 47 L50 32 L75 47 L50 67 Z" fill="none" stroke="#fff" stroke-width="2"/>
-        <text x="50" y="84" fill="#fff" font-size="10" font-weight="bold" font-family="'Outfit', sans-serif" text-anchor="middle">FALCÕES</text>
-    </svg>
-    """,
-    "Demolidor": """
-    <svg width="28" height="28" viewBox="0 0 100 100" style="vertical-align: middle; margin-right: 8px;">
-        <path d="M10 20 L50 5 L90 20 L90 60 C90 85 50 98 50 98 C50 98 10 85 10 60 Z" fill="#991b1b" stroke="#000" stroke-width="4"/>
-        <text x="50" y="66" fill="#fff" font-size="44" font-weight="bold" font-family="Georgia, serif" text-anchor="middle">D</text>
-        <text x="50" y="86" fill="#ccc" font-size="9" font-weight="bold" font-family="'Outfit', sans-serif" text-anchor="middle">DEMOLIDOR</text>
-    </svg>
-    """
-}
+@st.cache_data
+def carregar_escudo_base64(time_nome):
+    mapping = {
+        "Napoli": "img/napoli.png",
+        "Sol Nascente": "img/sol_nascente.png",
+        "Falcões FC": "img/falcoes.png",
+        "Demolidor": "img/demolidor.png"
+    }
+    caminho = mapping.get(time_nome)
+    if caminho and os.path.exists(caminho):
+        try:
+            with open(caminho, "rb") as f:
+                dados = f.read()
+                encoded = base64.b64encode(dados).decode("utf-8")
+                return f"data:image/png;base64,{encoded}"
+        except Exception as e:
+            st.error(f"Erro ao carregar imagem para {time_nome}: {e}")
+    return ""
+
+# Dicionário de Escudos dos Times (Base64 PNG)
+ESCUDOS = {}
+for time in ["Napoli", "Sol Nascente", "Falcões FC", "Demolidor"]:
+    base64_img = carregar_escudo_base64(time)
+    if base64_img:
+        ESCUDOS[time] = f'<img src="{base64_img}" width="28" height="28" style="vertical-align: middle; margin-right: 8px; border-radius: 4px; object-fit: contain;">'
+    else:
+        ESCUDOS[time] = ""
 
 # Estilos CSS premium
 st.markdown("""
