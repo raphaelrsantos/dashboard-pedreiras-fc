@@ -34,7 +34,7 @@ df_artilharia = carregar_dados(URL_ARTILHARIA)
 df_assistencias = carregar_dados(URL_ASSISTENCIAS)
 df_cartoes = carregar_dados(URL_CARTOES)
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def carregar_escudo_base64(time_nome):
     mapping = {
         "Napoli": "img/napoli.png",
