@@ -10,13 +10,9 @@ def render_html(html_str):
     cleaned = " ".join(html_str.split())
     st.markdown(cleaned, unsafe_allow_html=True)
 
-# URLs das abas da planilha
-URL_CLASSIFICACAO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjDTToac4PiSRhO2U-7IUKmklwHa_nYpIe2f7F00hNd_cdZm7HnaSu2boggd5BkWnOlpiOqaRiysjI/pub?gid=1791764253&single=true&output=csv"
+# URLs das abas da planilha (apenas Jogos e Eventos — classificação e stats são calculados dinamicamente)
 URL_JOGOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjDTToac4PiSRhO2U-7IUKmklwHa_nYpIe2f7F00hNd_cdZm7HnaSu2boggd5BkWnOlpiOqaRiysjI/pub?gid=298235476&single=true&output=csv"
 URL_EVENTOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjDTToac4PiSRhO2U-7IUKmklwHa_nYpIe2f7F00hNd_cdZm7HnaSu2boggd5BkWnOlpiOqaRiysjI/pub?gid=1934038280&single=true&output=csv"
-URL_ARTILHARIA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjDTToac4PiSRhO2U-7IUKmklwHa_nYpIe2f7F00hNd_cdZm7HnaSu2boggd5BkWnOlpiOqaRiysjI/pub?gid=1324913652&single=true&output=csv"
-URL_ASSISTENCIAS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjDTToac4PiSRhO2U-7IUKmklwHa_nYpIe2f7F00hNd_cdZm7HnaSu2boggd5BkWnOlpiOqaRiysjI/pub?gid=1514136485&single=true&output=csv"
-URL_CARTOES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSjDTToac4PiSRhO2U-7IUKmklwHa_nYpIe2f7F00hNd_cdZm7HnaSu2boggd5BkWnOlpiOqaRiysjI/pub?gid=1503475378&single=true&output=csv"
 
 @st.cache_data(ttl=600)
 def carregar_dados(url):
@@ -26,13 +22,61 @@ def carregar_dados(url):
         st.error(f"Erro ao carregar dados do link: {url}. Detalhes: {e}")
         return pd.DataFrame()
 
-# Carregamento em cache
-df_classif = carregar_dados(URL_CLASSIFICACAO)
+# Carregamento em cache (apenas jogos e eventos)
 df_jogos = carregar_dados(URL_JOGOS)
 df_eventos = carregar_dados(URL_EVENTOS)
-df_artilharia = carregar_dados(URL_ARTILHARIA)
-df_assistencias = carregar_dados(URL_ASSISTENCIAS)
-df_cartoes = carregar_dados(URL_CARTOES)
+
+# ============================================================
+# Funções de cálculo dinâmico por rodada
+# ============================================================
+def calcular_classificacao(df_j):
+    """Calcula classificação a partir dos jogos filtrados."""
+    times = {}
+    for _, jogo in df_j.iterrows():
+        m, v = jogo['Mandante'], jogo['Visitante']
+        gm, gv = int(jogo['Gols_Mandante']), int(jogo['Gols_Visitante'])
+        for t in [m, v]:
+            if t not in times:
+                times[t] = {'J': 0, 'V': 0, 'E': 0, 'D': 0, 'GM': 0, 'GS': 0}
+        times[m]['J'] += 1; times[v]['J'] += 1
+        times[m]['GM'] += gm; times[m]['GS'] += gv
+        times[v]['GM'] += gv; times[v]['GS'] += gm
+        if gm > gv:
+            times[m]['V'] += 1; times[v]['D'] += 1
+        elif gm < gv:
+            times[v]['V'] += 1; times[m]['D'] += 1
+        else:
+            times[m]['E'] += 1; times[v]['E'] += 1
+    rows = []
+    for t, s in times.items():
+        rows.append({'Equipe': t, 'PT': s['V']*3 + s['E'], 'J': s['J'],
+                     'V': s['V'], 'E': s['E'], 'D': s['D'],
+                     'GM': s['GM'], 'GS': s['GS'], 'SG': s['GM'] - s['GS']})
+    return pd.DataFrame(rows).sort_values(by=['PT','V','SG'], ascending=False).reset_index(drop=True)
+
+def calcular_artilharia(df_ev):
+    """Calcula ranking de artilharia."""
+    if df_ev.empty: return pd.DataFrame(columns=['Jogador','Gols'])
+    gols = df_ev[df_ev['Tipo_Evento'] == 'Gol']
+    if gols.empty: return pd.DataFrame(columns=['Jogador','Gols'])
+    return gols.groupby('Jogador')['Quantidade'].sum().reset_index().rename(
+        columns={'Quantidade':'Gols'}).sort_values('Gols', ascending=False).reset_index(drop=True)
+
+def calcular_assistencias_rank(df_ev):
+    """Calcula ranking de assistências."""
+    if df_ev.empty: return pd.DataFrame(columns=['Jogador','Assistências'])
+    a = df_ev[df_ev['Tipo_Evento'] == 'Assistência']
+    if a.empty: return pd.DataFrame(columns=['Jogador','Assistências'])
+    return a.groupby('Jogador')['Quantidade'].sum().reset_index().rename(
+        columns={'Quantidade':'Assistências'}).sort_values('Assistências', ascending=False).reset_index(drop=True)
+
+def calcular_cartoes_rank(df_ev):
+    """Calcula ranking de cartões amarelos."""
+    if df_ev.empty: return pd.DataFrame(columns=['Jogador','Cartões Amarelos'])
+    c = df_ev[df_ev['Tipo_Evento'] == 'Cartão Amarelo']
+    if c.empty: return pd.DataFrame(columns=['Jogador','Cartões Amarelos'])
+    return c.groupby('Jogador')['Quantidade'].sum().reset_index().rename(
+        columns={'Quantidade':'Cartões Amarelos'}).sort_values('Cartões Amarelos', ascending=False).reset_index(drop=True)
 
 @st.cache_data(ttl=3600)
 def carregar_escudo_base64(time_nome):
@@ -316,8 +360,9 @@ render_html("""
 # Lógica de Rodadas/Filtros
 if not df_jogos.empty:
     # Agrupar rodadas por data única de jogo
-    datas_ordenadas = pd.to_datetime(df_jogos['Data'], format='%d/%m/%Y').sort_values().unique()
-    datas_str = [d.strftime('%d/%m/%Y') for d in datas_ordenadas]
+    df_jogos['Data_dt'] = pd.to_datetime(df_jogos['Data'], format='%d/%m/%Y')
+    datas_ordenadas = df_jogos['Data_dt'].sort_values().unique()
+    datas_str = [pd.Timestamp(d).strftime('%d/%m/%Y') for d in datas_ordenadas]
     
     # Criar mapeamento de rodadas
     opcoes_rodada = {}
@@ -328,9 +373,30 @@ if not df_jogos.empty:
     # Seleção de rodada (padrão é a última rodada jogada)
     rodada_selecionada = st.sidebar.selectbox("Selecione a Rodada:", list(opcoes_rodada.keys()), index=len(opcoes_rodada)-1)
     data_filtro = opcoes_rodada[rodada_selecionada]
+    
+    # Verificar se é a última rodada
+    idx_rodada = list(opcoes_rodada.keys()).index(rodada_selecionada)
+    eh_ultima_rodada = idx_rodada == len(opcoes_rodada) - 1
+    
+    # Filtrar jogos e eventos ATÉ a rodada selecionada (para classificação e stats)
+    data_filtro_dt = pd.to_datetime(data_filtro, format='%d/%m/%Y')
+    df_jogos_ate_rodada = df_jogos[df_jogos['Data_dt'] <= data_filtro_dt]
+    ids_ate_rodada = df_jogos_ate_rodada['ID_Partida'].unique()
+    df_eventos_ate_rodada = df_eventos[df_eventos['ID_Partida'].isin(ids_ate_rodada)] if not df_eventos.empty else pd.DataFrame()
+    
+    # Calcular classificação e estatísticas acumuladas até a rodada
+    df_classif = calcular_classificacao(df_jogos_ate_rodada)
+    df_artilharia = calcular_artilharia(df_eventos_ate_rodada)
+    df_assistencias = calcular_assistencias_rank(df_eventos_ate_rodada)
+    df_cartoes = calcular_cartoes_rank(df_eventos_ate_rodada)
 else:
     data_filtro = None
     rodada_selecionada = ""
+    eh_ultima_rodada = True
+    df_classif = pd.DataFrame()
+    df_artilharia = pd.DataFrame()
+    df_assistencias = pd.DataFrame()
+    df_cartoes = pd.DataFrame()
 
 # Layout Principal: Duas Colunas
 col_esquerda, col_direita = st.columns([1.1, 1.2])
@@ -443,7 +509,8 @@ with col_esquerda:
 
 # COLUNA DIREITA: Tabela de Classificação
 with col_direita:
-    st.markdown("<div class='classificacao-title'>Classificação Geral</div>", unsafe_allow_html=True)
+    titulo_classif = "Classificação Geral" if eh_ultima_rodada else f"Classificação - até {rodada_selecionada}"
+    st.markdown(f"<div class='classificacao-title'>{titulo_classif}</div>", unsafe_allow_html=True)
     
     if not df_classif.empty:
         # Ordenar classificação conforme os critérios (Pontos desc, Vitórias desc, Saldo desc)
