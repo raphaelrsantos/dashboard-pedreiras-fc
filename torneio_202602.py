@@ -78,6 +78,14 @@ def calcular_cartoes_rank(df_ev):
     return c.groupby('Jogador')['Quantidade'].sum().reset_index().rename(
         columns={'Quantidade':'Cartões Amarelos'}).sort_values('Cartões Amarelos', ascending=False).reset_index(drop=True)
 
+def calcular_cartoes_vermelhos_rank(df_ev):
+    """Calcula ranking de cartões vermelhos."""
+    if df_ev.empty: return pd.DataFrame(columns=['Jogador','Cartões Vermelhos'])
+    c = df_ev[df_ev['Tipo_Evento'] == 'Cartão Vermelho']
+    if c.empty: return pd.DataFrame(columns=['Jogador','Cartões Vermelhos'])
+    return c.groupby('Jogador')['Quantidade'].sum().reset_index().rename(
+        columns={'Quantidade':'Cartões Vermelhos'}).sort_values('Cartões Vermelhos', ascending=False).reset_index(drop=True)
+
 @st.cache_data(ttl=3600)
 def carregar_escudo_base64(time_nome):
     mapping = {
@@ -389,6 +397,7 @@ if not df_jogos.empty:
     df_artilharia = calcular_artilharia(df_eventos_ate_rodada)
     df_assistencias = calcular_assistencias_rank(df_eventos_ate_rodada)
     df_cartoes = calcular_cartoes_rank(df_eventos_ate_rodada)
+    df_cartoes_vermelhos = calcular_cartoes_vermelhos_rank(df_eventos_ate_rodada)
 else:
     data_filtro = None
     rodada_selecionada = ""
@@ -397,6 +406,7 @@ else:
     df_artilharia = pd.DataFrame()
     df_assistencias = pd.DataFrame()
     df_cartoes = pd.DataFrame()
+    df_cartoes_vermelhos = pd.DataFrame()
 
 # Layout Principal: Duas Colunas
 col_esquerda, col_direita = st.columns([1.1, 1.2])
@@ -425,8 +435,8 @@ with col_esquerda:
             eventos_partida = df_eventos[df_eventos['ID_Partida'] == id_partida] if not df_eventos.empty else pd.DataFrame()
             
             # Separar eventos de mandante e visitante
-            gols_m_lista, assists_m_lista, cartoes_m_lista = [], [], []
-            gols_v_lista, assists_v_lista, cartoes_v_lista = [], [], []
+            gols_m_lista, assists_m_lista, cartoes_m_lista, vermelhos_m_lista = [], [], [], []
+            gols_v_lista, assists_v_lista, cartoes_v_lista, vermelhos_v_lista = [], [], [], []
             
             for _, ev in eventos_partida.iterrows():
                 time_ev = ev['Time']
@@ -448,6 +458,8 @@ with col_esquerda:
                         assists_m_lista.append(txt)
                     elif tipo == "Cartão Amarelo":
                         cartoes_m_lista.append(txt)
+                    elif tipo == "Cartão Vermelho":
+                        vermelhos_m_lista.append(txt)
                 elif time_ev == visitante:
                     if tipo in ["Gol", "Gol Contra"]:
                         gols_v_lista.append(txt)
@@ -455,6 +467,8 @@ with col_esquerda:
                         assists_v_lista.append(txt)
                     elif tipo == "Cartão Amarelo":
                         cartoes_v_lista.append(txt)
+                    elif tipo == "Cartão Vermelho":
+                        vermelhos_v_lista.append(txt)
             
             # Montar HTML do Card
             card_html = f"""
@@ -484,6 +498,8 @@ with col_esquerda:
                 card_html += f'<div class="evento-item">👟 <span>Assists:</span> {", ".join(assists_m_lista)}</div>'
             if cartoes_m_lista:
                 card_html += f'<div class="evento-item">🟨 <span>C. Amarelo:</span> {", ".join(cartoes_m_lista)}</div>'
+            if vermelhos_m_lista:
+                card_html += f'<div class="evento-item">🟥 <span>C. Vermelho:</span> {", ".join(vermelhos_m_lista)}</div>'
             
             card_html += """
                     </div>
@@ -497,6 +513,8 @@ with col_esquerda:
                 card_html += f'<div class="evento-item">👟 <span>Assists:</span> {", ".join(assists_v_lista)}</div>'
             if cartoes_v_lista:
                 card_html += f'<div class="evento-item">🟨 <span>C. Amarelo:</span> {", ".join(cartoes_v_lista)}</div>'
+            if vermelhos_v_lista:
+                card_html += f'<div class="evento-item">🟥 <span>C. Vermelho:</span> {", ".join(vermelhos_v_lista)}</div>'
                 
             card_html += """
                     </div>
@@ -562,7 +580,7 @@ with col_direita:
 st.markdown("<br><br>", unsafe_allow_html=True)
 
 # PAINEL INFERIOR: Três colunas de Estatísticas Individuais
-col_art, col_garc, col_cart = st.columns(3)
+col_art, col_garc, col_cart, col_verm = st.columns(4)
 
 # 1. Artilharia
 with col_art:
@@ -623,6 +641,26 @@ with col_cart:
         html_cart += "<p style='color: #cbd5e1; font-size: 0.9rem;'>Dados de cartões indisponíveis.</p>"
     html_cart += "</div>"
     render_html(html_cart)
+
+# 4. Cartões Vermelhos
+with col_verm:
+    html_verm = '<div class="stat-box"><div class="stat-box-title">🟥 Cartão Vermelho</div>'
+    if not df_cartoes_vermelhos.empty:
+        df_verm_filtered = df_cartoes_vermelhos[df_cartoes_vermelhos['Cartões Vermelhos'] > 0].sort_values(by="Cartões Vermelhos", ascending=False)
+        if not df_verm_filtered.empty:
+            for _, row in df_verm_filtered.iterrows():
+                html_verm += f"""
+                <div class="stat-row">
+                    <span class="stat-jogador">{row['Jogador']}</span>
+                    <span class="stat-valor">{row['Cartões Vermelhos']} cartões</span>
+                </div>
+                """
+        else:
+            html_verm += "<p style='color: #cbd5e1; font-size: 0.9rem;'>Nenhum cartão registrado.</p>"
+    else:
+        html_verm += "<p style='color: #cbd5e1; font-size: 0.9rem;'>Nenhum cartão vermelho registrado.</p>"
+    html_verm += "</div>"
+    render_html(html_verm)
 
 # Rodapé simples
 render_html("""
