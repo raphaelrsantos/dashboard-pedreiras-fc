@@ -2,11 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instalar dependências do sistema (necessário para o healthcheck e algumas libs Python)
+# Instalar dependências do sistema e do Google Chrome/Chromium completo (necessário pro Kaleido)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
-    chromium \
+    && apt-get install -y chromium \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar e instalar dependências Python
