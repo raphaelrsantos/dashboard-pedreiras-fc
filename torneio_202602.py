@@ -378,6 +378,13 @@ if not df_jogos.empty:
         opcoes_rodada[f"{idx + 1}ª Rodada ({data_str[:-5]})"] = data_str
         
     st.sidebar.markdown("<h3 style='color: #FFD700;'>⚙️ Filtros</h3>", unsafe_allow_html=True)
+    
+    # Botão para forçar atualização dos dados da planilha
+    if st.sidebar.button("🔄 Atualizar Dados", use_container_width=True, help="Clique para buscar os dados mais recentes da planilha"):
+        st.cache_data.clear()
+        st.rerun()
+    st.sidebar.markdown("---")
+    
     # Seleção de rodada (padrão é a última rodada jogada)
     rodada_selecionada = st.sidebar.selectbox("Selecione a Rodada:", list(opcoes_rodada.keys()), index=len(opcoes_rodada)-1)
     data_filtro = opcoes_rodada[rodada_selecionada]
