@@ -12,16 +12,21 @@ services:
       - --server.address=0.0.0.0
       - --server.headless=true
     networks:
-      - traefik-public
+      - traefik_public
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.docker.network=externa"
         - "traefik.http.routers.pedreiras-portal.rule=Host(`pedreirasfc.com.br`)"
+        - "traefik.http.routers.pedreiras-portal.service=pedreiras-portal"
         - "traefik.http.routers.pedreiras-portal.entrypoints=websecure"
-        - "traefik.http.routers.pedreiras-portal.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.pedreiras-portal.tls.certresolver=le"
+        - "traefik.http.routers.pedreiras-portal.tls=true"
         - "traefik.http.routers.pedreiras-portal.priority=1"
         - "traefik.http.services.pedreiras-portal.loadbalancer.server.port=8501"
 
@@ -37,16 +42,21 @@ services:
       - --server.headless=true
       - --server.baseUrlPath=/financeiro
     networks:
-      - traefik-public
+      - traefik_public
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.docker.network=externa"
         - "traefik.http.routers.pedreiras-financeiro.rule=Host(`pedreirasfc.com.br`) && PathPrefix(`/financeiro`)"
+        - "traefik.http.routers.pedreiras-financeiro.service=pedreiras-financeiro"
         - "traefik.http.routers.pedreiras-financeiro.entrypoints=websecure"
-        - "traefik.http.routers.pedreiras-financeiro.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.pedreiras-financeiro.tls.certresolver=le"
+        - "traefik.http.routers.pedreiras-financeiro.tls=true"
         - "traefik.http.services.pedreiras-financeiro.loadbalancer.server.port=8501"
 
   # ============================================================
@@ -61,18 +71,24 @@ services:
       - --server.headless=true
       - --server.baseUrlPath=/torneio
     networks:
-      - traefik-public
+      - traefik_public
     deploy:
       mode: replicated
       replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=traefik-public"
+        - "traefik.docker.network=externa"
         - "traefik.http.routers.pedreiras-torneio.rule=Host(`pedreirasfc.com.br`) && PathPrefix(`/torneio`)"
+        - "traefik.http.routers.pedreiras-torneio.service=pedreiras-torneio"
         - "traefik.http.routers.pedreiras-torneio.entrypoints=websecure"
-        - "traefik.http.routers.pedreiras-torneio.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.pedreiras-torneio.tls.certresolver=le"
+        - "traefik.http.routers.pedreiras-torneio.tls=true"
         - "traefik.http.services.pedreiras-torneio.loadbalancer.server.port=8501"
 
 networks:
-  traefik-public:
+  traefik_public:
     external: true
+    name: externa
