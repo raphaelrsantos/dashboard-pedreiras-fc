@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from gerador_pdf import criar_pdf_relatorio
+
 
 st.set_page_config(page_title="Dashboard Financeiro - Pedreiras FC", page_icon="⚽", layout="wide")
 
@@ -494,23 +494,7 @@ if URL_GOOGLE_SHEETS:
             
         st.markdown("---")
         
-        col_header, col_btn = st.columns([3, 1])
-        with col_header:
-            st.header("Últimas Movimentações")
-            
-        with col_btn:
-            pdf_bytes = criar_pdf_relatorio(
-                df_periodo, mes_selecionado, entradas, saidas, saldo_periodo, saldo_atual,
-                fig_receitas, fig_despesas, fig_evolucao, fig_saldo, fig_parcelas
-            )
-            st.download_button(
-                label="📄 Baixar PDF do Relatório",
-                data=pdf_bytes,
-                file_name=f"Relatorio_Pedreiras_{mes_selecionado.replace('/', '_')}.pdf" if mes_selecionado != "Todos" else "Relatorio_Pedreiras_Completo.pdf",
-                mime="application/pdf",
-                use_container_width=True
-            )
-        
+        st.header("Últimas Movimentações")
         def highlight_tipo(row):
             if row['Tipo'] == 'Entrada':
                 color = 'rgba(0, 255, 0, 0.15)'
