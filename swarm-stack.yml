@@ -6,11 +6,13 @@ services:
   # ============================================================
   portal:
     image: pedreiras-app:latest
+    entrypoint: ["python"]
     command:
-      - portal.py
-      - --server.port=8501
-      - --server.address=0.0.0.0
-      - --server.headless=true
+      - "-m"
+      - "http.server"
+      - "8501"
+      - "--directory"
+      - "portal_web"
     networks:
       - traefik_public
     deploy:
