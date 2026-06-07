@@ -5,11 +5,13 @@ services:
   portal:
     build: .
     container_name: pedreiras-portal
+    entrypoint: ["python"]
     command:
-      - portal.py
-      - --server.port=8501
-      - --server.address=0.0.0.0
-      - --server.headless=true
+      - "-m"
+      - "http.server"
+      - "8501"
+      - "--directory"
+      - "portal_web"
     restart: unless-stopped
     networks:
       - traefik

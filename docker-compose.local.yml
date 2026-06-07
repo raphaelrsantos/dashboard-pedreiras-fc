@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # TRAEFIK LOCAL (Roteador reverso para simular o servidor Hetzner)
+  # ============================================================
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik-local
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"        # Porta para acessar as aplicações (http://localhost)
+      - "8080:8080"    # Dashboard do Traefik (http://localhost:8080)
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  # ============================================================
+  # PORTAL (http://localhost/)
+  # ============================================================
+  portal:
+    build: .
+    container_name: pedreiras-portal-local
+    entrypoint: ["python"]
+    command:
+      - "-m"
+      - "http.server"
+      - "8501"
+      - "--directory"
+      - "portal_web"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portal-local.rule=Host(`localhost`)"
+      - "traefik.http.routers.portal-local.entrypoints=web"
+      - "traefik.http.routers.portal-local.priority=1"
+      - "traefik.http.services.portal-local.loadbalancer.server.port=8501"
+
+  # ============================================================
+  # FINANCEIRO (http://localhost/financeiro)
+  # ============================================================
+  financeiro:
+    build: .
+    container_name: pedreiras-financeiro-local
+    command:
+      - app.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+      - --server.baseUrlPath=/financeiro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.financeiro-local.rule=Host(`localhost`) && PathPrefix(`/financeiro`)"
+      - "traefik.http.routers.financeiro-local.entrypoints=web"
+      - "traefik.http.services.financeiro-local.loadbalancer.server.port=8501"
+
+  # ============================================================
+  # TORNEIO (http://localhost/torneio)
+  # ============================================================
+  torneio:
+    build: .
+    container_name: pedreiras-torneio-local
+    command:
+      - torneio_202602.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+      - --server.baseUrlPath=/torneio
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.torneio-local.rule=Host(`localhost`) && PathPrefix(`/torneio`)"
+      - "traefik.http.routers.torneio-local.entrypoints=web"
+      - "traefik.http.services.torneio-local.loadbalancer.server.port=8501"
