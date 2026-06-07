@@ -2,9 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instalar dependências do sistema (necessário para algumas libs Python)
+# Instalar dependências do sistema (necessário para o healthcheck e algumas libs Python)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar e instalar dependências Python
@@ -16,7 +17,7 @@ COPY . .
 
 EXPOSE 8501
 
-# Healthcheck para Traefik
+# Healthcheck para garantir que a aplicação não trava
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
