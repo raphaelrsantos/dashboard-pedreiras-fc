@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # ============================================================
+  # PORTAL (raiz: pedreirasfc.com.br/)
+  # ============================================================
+  portal:
+    image: pedreiras-app:latest
+    command:
+      - portal.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+    networks:
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.pedreiras-portal.rule=Host(`pedreirasfc.com.br`)"
+        - "traefik.http.routers.pedreiras-portal.entrypoints=websecure"
+        - "traefik.http.routers.pedreiras-portal.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.pedreiras-portal.priority=1"
+        - "traefik.http.services.pedreiras-portal.loadbalancer.server.port=8501"
+
+  # ============================================================
+  # FINANCEIRO (subpasta: pedreirasfc.com.br/financeiro)
+  # ============================================================
+  financeiro:
+    image: pedreiras-app:latest
+    command:
+      - app.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+      - --server.baseUrlPath=/financeiro
+    networks:
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.pedreiras-financeiro.rule=Host(`pedreirasfc.com.br`) && PathPrefix(`/financeiro`)"
+        - "traefik.http.routers.pedreiras-financeiro.entrypoints=websecure"
+        - "traefik.http.routers.pedreiras-financeiro.tls.certresolver=letsencrypt"
+        - "traefik.http.services.pedreiras-financeiro.loadbalancer.server.port=8501"
+
+  # ============================================================
+  # TORNEIO (subpasta: pedreirasfc.com.br/torneio)
+  # ============================================================
+  torneio:
+    image: pedreiras-app:latest
+    command:
+      - torneio_202602.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+      - --server.baseUrlPath=/torneio
+    networks:
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.pedreiras-torneio.rule=Host(`pedreirasfc.com.br`) && PathPrefix(`/torneio`)"
+        - "traefik.http.routers.pedreiras-torneio.entrypoints=websecure"
+        - "traefik.http.routers.pedreiras-torneio.tls.certresolver=letsencrypt"
+        - "traefik.http.services.pedreiras-torneio.loadbalancer.server.port=8501"
+
+networks:
+  traefik-public:
+    external: true
