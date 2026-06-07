@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
+    chromium \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar e instalar dependências Python
