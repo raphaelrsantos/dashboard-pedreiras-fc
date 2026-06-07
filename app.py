@@ -290,7 +290,7 @@ if URL_GOOGLE_SHEETS:
                     xaxis=dict(showticklabels=False, range=[0, max_rec / 0.70]),
                     margin=dict(l=5, r=5, t=5, b=5)
                 )
-                st.plotly_chart(fig_receitas, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_receitas, use_container_width=True)
             else:
                 st.info("Nenhuma entrada registrada.")
                 
@@ -325,7 +325,7 @@ if URL_GOOGLE_SHEETS:
                     xaxis=dict(showticklabels=False, range=[0, max_des / 0.30]),
                     margin=dict(l=5, r=5, t=5, b=5)
                 )
-                st.plotly_chart(fig_despesas, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_despesas, use_container_width=True)
             else:
                 st.info("Nenhuma saída registrada.")
 
@@ -345,7 +345,7 @@ if URL_GOOGLE_SHEETS:
                 fig_evolucao.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0)
                 fig_evolucao.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False,
                                            legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11)))
-                st.plotly_chart(fig_evolucao, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_evolucao, use_container_width=True)
                 
         # Gráfico de Saldo Acumulado: apenas quando "Todos" os meses estão selecionados
         if mes_selecionado == "Todos":
@@ -361,7 +361,7 @@ if URL_GOOGLE_SHEETS:
                                        color_discrete_sequence=['#005A32'])
                     fig_saldo.update_traces(texttemplate='<b>%{text}</b>', textposition='outside', textfont_size=12, textangle=0)
                     fig_saldo.update_layout(yaxis_title=None, xaxis_title=None, yaxis=dict(showticklabels=False), dragmode=False)
-                    st.plotly_chart(fig_saldo, use_container_width=True, config={'staticPlot': True})
+                    st.plotly_chart(fig_saldo, use_container_width=True)
 
         st.markdown("---")
         st.subheader("Acompanhamento de Parcelamentos")
@@ -486,7 +486,7 @@ if URL_GOOGLE_SHEETS:
                     yaxis=dict(tickfont=dict(size=11)),
                     legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11))
                 )
-                st.plotly_chart(fig_parcelas, use_container_width=True, config={'staticPlot': True})
+                st.plotly_chart(fig_parcelas, use_container_width=True)
             else:
                 st.info("Nenhuma parcela ativa neste período.")
         else:
